@@ -1,0 +1,5 @@
+{
+    "threshold": 0.6,
+    "max_convergence_points": 5,
+    "scenario_labels": ["ShadowStrike", "InsightBurst", "VolatilityGate"]
+}
