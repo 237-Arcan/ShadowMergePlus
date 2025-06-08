@@ -1,0 +1,10 @@
+default:
+  log_level: INFO
+  data_path: ./data
+  model_path: ./models/checkpoints
+  enable_modules:
+    shadow_odds: true
+    arcanx: true
+    sentinel_live: true
+    khawatim: true
+    arcanpocs: true
