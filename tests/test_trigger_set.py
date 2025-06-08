@@ -1,4 +1,4 @@
-from core.shared.helpers import TriggerSet  # Modifie l'import selon l'emplacement réel de TriggerSet
+from core.shadowodds.triggerset import TriggerSet   # Modifie l'import selon l'emplacement réel de TriggerSet
 
 def test_trigger_set_identify_triggers():
     trigger_set = TriggerSet()

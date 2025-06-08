@@ -1,4 +1,4 @@
-from core.shadowodds.khawatim import KhawatimEngine
+from core.arcanx.khawatim import KhawatimEngine
 
 def test_khawatim_engine_instantiation():
     engine = KhawatimEngine()

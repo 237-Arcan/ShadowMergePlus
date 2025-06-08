@@ -27,3 +27,9 @@ class POCMatrix:
             'count': len(self.points),
             'data': self.points
         }
+
+def load_poc_matrix():
+    """
+    Initialise et retourne une instance vide de POCMatrix.
+    """
+    return POCMatrix()
