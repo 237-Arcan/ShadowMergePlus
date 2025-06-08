@@ -1,0 +1,21 @@
+@startuml
+actor Utilisateur
+
+Utilisateur -> main.py : lance une analyse ou prédiction
+
+main.py -> shared.config : charge la config
+main.py -> shared.logger : initialise le logger
+main.py -> shadowodds/ : active ShadowOddsEngine
+main.py -> arcanx/ : active ArcanXEngine
+main.py -> arcanpocs/ : active ArcanPOCS
+main.py -> khawatim/ : active Khawatim
+main.py -> shared.data_loader : charge les datasets
+
+shadowodds/ -> datasets/ : lit odds_history.csv, patterns
+arcanx/ -> datasets/ : lit historiques, patterns
+
+main.py -> shared.helpers : normalisation, fusion, triggers
+
+main.py -> Utilisateur : affiche résultats, logs, alertes
+
+@enduml
