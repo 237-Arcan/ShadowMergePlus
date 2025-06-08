@@ -1,0 +1,20 @@
+{
+  "patterns": [
+    {
+      "type": "favorite-high-volume",
+      "criteria": {
+        "majority_on_favorite": true,
+        "odds_behavior": "static_or_increasing"
+      },
+      "signal_strength": "alert"
+    },
+    {
+      "type": "underdog-drop",
+      "criteria": {
+        "minority_on_underdog": true,
+        "odds_behavior": "sharp_drop"
+      },
+      "signal_strength": "trigger"
+    }
+  ]
+}

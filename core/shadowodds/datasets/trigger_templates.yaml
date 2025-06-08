@@ -1,0 +1,10 @@
+triggers:
+  - name: Favorite Suspicion
+    odds_range: [1.50, 1.75]
+    volume_behavior: favorite-high-volume
+    response: Consider Avoid or Back Opponent
+
+  - name: Underdog Drop Trigger
+    odds_range: [4.50, 5.00]
+    volume_behavior: underdog-drop
+    response: Signal for Underdog Backing
