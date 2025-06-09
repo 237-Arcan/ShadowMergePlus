@@ -10,6 +10,9 @@ from core.pocs import ArcanPOCS
 from core.khawatim import Khawatim
 from utils.helpers import InsightManager, TriggerSet, PredictionEvaluator
 
+# ✅ Import du hub d'intégration
+from data_integration.data_integration_hub import DataIntegrationHub
+
 # Initialisation du logger
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger("ShadowMerge+")
@@ -46,12 +49,23 @@ def main():
     args = parser.parse_args()
 
     settings = load_settings()
+
+    # ✅ Initialisation du DataIntegrationHub
+    data_hub = DataIntegrationHub()
+    available_sources = data_hub.get_available_adapters()
+    logger.info(f"Sources de données disponibles : {available_sources}")
+
     modules = initialize_modules(settings)
 
     logger.info("Démarrage de l'analyse pour le match: %s", args.match_id)
 
     insights = InsightManager.collect(args.match_id)
     triggers = TriggerSet.generate(args.match_id)
+
+    # ✅ Exemple de récupération via un adaptateur (OpenAPI)
+    openapi_matches = data_hub.fetch_data('openapi', args.match_id)
+    if openapi_matches:
+        logger.info(f"[DataHub] Données OpenAPI reçues pour {args.match_id}")
 
     predictions = []
 
