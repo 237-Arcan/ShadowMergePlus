@@ -10,8 +10,10 @@ from core.pocs import ArcanPOCS
 from core.khawatim import Khawatim
 from utils.helpers import InsightManager, TriggerSet, PredictionEvaluator
 
-# ✅ Import du hub d'intégration
+# ✅ Import du hub d'intégration et des modules Orchestrator/FusionEngine
 from data_integration.data_integration_hub import DataIntegrationHub
+from data_integration.orchestrator import DataOrchestrator
+from data_integration.fusion_engine import FusionEngine
 
 # Initialisation du logger
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
@@ -52,8 +54,9 @@ def main():
 
     # ✅ Initialisation du DataIntegrationHub
     data_hub = DataIntegrationHub()
-    available_sources = data_hub.get_available_adapters()
-    logger.info(f"Sources de données disponibles : {available_sources}")
+    if hasattr(data_hub, "get_available_adapters"):
+        available_sources = data_hub.get_available_adapters()
+        logger.info(f"Sources de données disponibles : {available_sources}")
 
     modules = initialize_modules(settings)
 
@@ -63,9 +66,28 @@ def main():
     triggers = TriggerSet.generate(args.match_id)
 
     # ✅ Exemple de récupération via un adaptateur (OpenAPI)
-    openapi_matches = data_hub.fetch_data('openapi', args.match_id)
-    if openapi_matches:
-        logger.info(f"[DataHub] Données OpenAPI reçues pour {args.match_id}")
+    if hasattr(data_hub, "fetch_data"):
+        openapi_matches = data_hub.fetch_data('openapi', args.match_id)
+        if openapi_matches:
+            logger.info(f"[DataHub] Données OpenAPI reçues pour {args.match_id}")
+    else:
+        openapi_matches = None
+
+    # ✅ Exemple d'intégration DataOrchestrator
+    orchestrator = DataOrchestrator()
+    try:
+        orchestrator_result = orchestrator.fuse(source="bet365", match_id=args.match_id)
+        logger.info(f"[Orchestrator] Données Bet365 reçues : {orchestrator_result}")
+    except Exception as e:
+        logger.warning(f"[Orchestrator] Impossible de récupérer Bet365 : {e}")
+
+    # ✅ Exemple d'intégration FusionEngine (multi-sources)
+    fusion_engine = FusionEngine()
+    try:
+        fusion_result_multi = fusion_engine.fuse_all(match_id=args.match_id, sources=["bet365", "soccerdata", "whoscored"])
+        logger.info(f"[FusionEngine] Fusion multi-source : {fusion_result_multi}")
+    except Exception as e:
+        logger.warning(f"[FusionEngine] Impossible de fusionner les sources : {e}")
 
     predictions = []
 

@@ -19,10 +19,10 @@ def test_fetch_data_openapi():
     hub = DataIntegrationHub()
     adapters = hub.get_available_adapters()
 
-    if "OpenAPIAdapter" not in adapters:
-        pytest.skip("OpenAPIAdapter non disponible pour ce test")
+    if "OpenapiAdapter" not in adapters:
+        pytest.skip("OpenapiAdapter non disponible pour ce test")
 
-    result = hub.fetch_data("OpenAPIAdapter", relative_path=None)  # Remplace par un chemin réel si besoin
+    result = hub.fetch_data("OpenapiAdapter", relative_path=None)  # Remplace par un chemin réel si besoin
     assert result is not None
 
 
