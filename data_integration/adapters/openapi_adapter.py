@@ -1,5 +1,5 @@
 # data_integration/adapters/openapi_adapter.py
-from .base_adapter import BaseAdapter
+from data_integration.adapters.base_adapter import BaseAdapter
 import os
 
 class OpenAPIAdapter(BaseAdapter):

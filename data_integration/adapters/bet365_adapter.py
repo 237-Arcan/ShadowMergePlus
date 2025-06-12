@@ -1,6 +1,6 @@
 # data_integration/adapters/bet365_adapter.py
 import os
-from .base_adapter import BaseAdapter
+from data_integration.adapters.base_adapter import BaseAdapter
 
 class Bet365Adapter(BaseAdapter):
     def __init__(self, repo_path):

@@ -1,7 +1,7 @@
 # data_integration/adapters/sportsbook_adapter.py
 
 import os
-from .base_adapter import BaseAdapter
+from data_integration.adapters.base_adapter import BaseAdapter
 
 class SportsBookAdapter(BaseAdapter):
     def __init__(self, repo_path):

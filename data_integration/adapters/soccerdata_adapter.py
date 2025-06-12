@@ -1,6 +1,6 @@
 # data_integration/adapters/soccerdata_adapter.py
 import os
-from .base_adapter import BaseAdapter
+from data_integration.adapters.base_adapter import BaseAdapter
 
 class SoccerDataAdapter(BaseAdapter):
     def __init__(self, repo_path):

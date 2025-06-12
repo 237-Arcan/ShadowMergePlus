@@ -1,48 +1,48 @@
-# data_integration/data_integration_hub.py
-
-import logging
-
-from data_integration.adapters.bet365_adapter import Bet365Adapter
-from data_integration.adapters.github_adapter import GithubAdapter
-from data_integration.adapters.openapi_adapter import OpenAPIAdapter
-from data_integration.adapters.soccerdata_adapter import SoccerDataAdapter
-from data_integration.adapters.sports_betting_adapter import SportsBettingAdapter
-from data_integration.adapters.sportsbook_adapter import SportsBookAdapter
-from data_integration.adapters.whoscored_adapter import WhoscoredAdapter
-
-ADAPTERS_CATALOG = {
-    "Bet365Adapter": Bet365Adapter,
-    "GithubAdapter": GithubAdapter,
-    "OpenAPIAdapter": OpenAPIAdapter,
-    "SoccerDataAdapter": SoccerDataAdapter,
-    "SportsBettingAdapter": SportsBettingAdapter,
-    "SportsBookAdapter": SportsBookAdapter,
-    "WhoscoredAdapter": WhoscoredAdapter,
-}
-
-REPO_BASE_PATH = "./data_sources/"
+import os
+import importlib.util
+import inspect
 
 class DataIntegrationHub:
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
-        self.adapters = self.get_available_adapters()
+        self.adapters = {}
+        self.load_adapters()
 
-    def get_available_adapters(self):
-        available_adapters = {}
+    def load_adapters(self):
+        """
+        Charge dynamiquement tous les adaptateurs du dossier adapters
+        et les enregistre dans le dictionnaire self.adapters
+        """
+        adapters_dir = os.path.join(os.path.dirname(__file__), "adapters")
 
-        for name, adapter_cls in ADAPTERS_CATALOG.items():
-            try:
-                instance = adapter_cls(repo_path=f"{REPO_BASE_PATH}{name}")
-                if instance.is_available():
-                    available_adapters[name] = instance
-                    self.logger.info(f"[Hub] Adaptateur disponible : {name}")
-            except Exception as e:
-                self.logger.warning(f"[Hub] Échec {name} : {e}")
+        for filename in os.listdir(adapters_dir):
+            if filename.endswith("_adapter.py"):
+                module_name = filename[:-3]  # Exemple: bet365_adapter
+                repo_name = module_name.replace("_adapter", "")  # Exemple: bet365
+                class_name = ''.join([part.capitalize() for part in module_name.split('_')])
 
-        return available_adapters
+                file_path = os.path.join(adapters_dir, filename)
+                spec = importlib.util.spec_from_file_location(module_name, file_path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
-    def fetch_data(self, source_name, **kwargs):
-        adapter = self.adapters.get(source_name)
+                adapter_class = getattr(module, class_name, None)
+                if adapter_class:
+                    try:
+                        sig = inspect.signature(adapter_class.__init__)
+                        params = list(sig.parameters.values())[1:]  # on saute 'self'
+                        if any(p.name == 'repo_path' for p in params):
+                            instance = adapter_class(repo_path=f"./data_sources/{repo_name}")
+                        else:
+                            instance = adapter_class()
+                        self.adapters[repo_name] = instance
+                    except Exception as e:
+                        print(f"[ERREUR] Instanciation échouée pour {class_name}: {e}")
+
+def get_adapter(self, name):
+        """
+        Retourne l'instance d'adaptateur correspondant au nom donné
+        """
+        adapter = self.adapters.get(name)
         if not adapter:
-            raise ValueError(f"Source inconnue : {source_name}")
-        return adapter.fetch_data(**kwargs)
+            raise ValueError(f"Aucun adaptateur trouvé pour la source : {name}")
+        return adapter
