@@ -1,3 +1,4 @@
+# ... autres imports ...
 import os
 import importlib
 from typing import Optional, Dict, Type
@@ -21,3 +22,10 @@ class DataIntegrationHub:
 
     def get_adapter(self, name: str) -> Optional[BaseAdapter]:
         return self.adapters.get(name.lower())
+
+    def get_available_adapters(self) -> dict:
+        """
+        Retourne le dictionnaire {nom_adapter: instance_adapter} des adaptateurs disponibles.
+        Utile pour l'orchestration dynamique.
+        """
+        return self.adapters
