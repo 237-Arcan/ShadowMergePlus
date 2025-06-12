@@ -3,6 +3,7 @@ from .triggers.freeze_trigger import FreezeTrigger
 from .triggers.betflow_trigger import BetflowTrigger
 from .triggers.base_trigger import BaseTrigger
 from utils.logger import StructuredLogger
+from utils.signal_output import make_signal_output
 
 class ShadowSignalEngine:
     """
@@ -43,8 +44,5 @@ class ShadowSignalEngine:
             match_id=match_data.get("match_id"),
             confidence_score=confidence_score,
         )
-        return {
-            "match_id": match_data.get("match_id"),
-            "confidence_score": confidence_score,
-            "signals": signals
-        }
+        # Utilisation centralisée du helper pour garantir la conformité du signal_output
+        return make_signal_output(match_data.get("match_id"), confidence_score, signals)
