@@ -9,8 +9,10 @@ from core.pocs import ArcanPOCS
 from core.khawatim import Khawatim
 from utils.helpers import InsightManager, TriggerSet, PredictionEvaluator
 
-# ✅ Import du DataOrchestrator
-from orchestrator.data_orchestrator import DataOrchestrator
+from orchestrator.batch_orchestrator import BatchDataOrchestrator
+
+# 👇 Importe le moteur d'analyse comportementale
+from signal_engine.shadow_signal_engine import ShadowSignalEngine
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger("ShadowMerge+")
@@ -42,50 +44,38 @@ def initialize_modules(settings):
 
 def main():
     parser = argparse.ArgumentParser(description="ShadowMerge+ | Système hybride de prédiction avancée.")
-    parser.add_argument('--match_id', type=str, help="ID du match à analyser", required=True)
+    parser.add_argument('--match_ids', nargs='+', help="Liste des IDs de matchs à analyser", required=True)
     parser.add_argument('--live', action='store_true', help="Activer le mode live pour ArcanSentinel")
     args = parser.parse_args()
 
     settings = load_settings()
-
     modules = initialize_modules(settings)
 
-    logger.info("Démarrage de l'analyse pour le match: %s", args.match_id)
+    logger.info("Démarrage de l'analyse pour les matchs: %s", args.match_ids)
 
-    # ✅ Collecte centralisée des données via DataOrchestrator
-    orchestrator = DataOrchestrator()
-    all_data = orchestrator.collect_match_data(args.match_id)
-    logger.info(f"[Orchestrator] Données agrégées pour {args.match_id} : {all_data}")
+    # ✅ Collecte centralisée des données via BatchDataOrchestrator
+    batch_orchestrator = BatchDataOrchestrator()
+    all_matches_data = batch_orchestrator.collect_all_for_matches(args.match_ids)
+    logger.info(f"[Orchestrator] Données agrégées : {all_matches_data}")
 
-    # Tu peux maintenant extraire des données agrégées pour chaque module, par exemple :
-    bet365_data = all_data.get("bet365", {})
-    whoscored_data = all_data.get("whoscored", {})
-    # ... etc.
+    # 👇 Analyse comportementale automatisée avec ShadowSignalEngine
+    signal_engine = ShadowSignalEngine()
+    for match_id, match_data in all_matches_data.items():
+        if "error" in match_data:
+            logger.error(f"Erreur lors de la collecte des données pour le match {match_id}: {match_data['error']}")
+            continue
 
-    # Si tu utilises toujours InsightManager/TriggerSet, tu peux les alimenter avec ces données ou continuer comme avant
-    insights = InsightManager.collect(args.match_id)
-    triggers = TriggerSet.generate(args.match_id)
+        signal_result = signal_engine.analyze(match_data)
+        logger.info(f"[Signals] Résultat pour {match_id}: {signal_result}")
 
-    predictions = []
+        # (Optionnel) : sauvegarder le signal_output.json pour chaque match
+        import os, json
+        output_dir = "outputs/signals/"
+        os.makedirs(output_dir, exist_ok=True)
+        with open(f"{output_dir}signal_{match_id}.json", "w") as f:
+            json.dump(signal_result, f, indent=2, ensure_ascii=False)
 
-    if 'shadow_odds' in modules:
-        predictions.append(modules['shadow_odds'].predict(args.match_id, insights, triggers))
-
-    if 'arcanx' in modules:
-        predictions.append(modules['arcanx'].predict(args.match_id, insights))
-
-    if 'sentinel' in modules and args.live:
-        predictions.append(modules['sentinel'].monitor_live(args.match_id))
-
-    if 'pocs' in modules:
-        predictions.append(modules['pocs'].generate_meta_prediction(args.match_id))
-
-    if 'khawatim' in modules:
-        predictions.append(modules['khawatim'].invoke(args.match_id))
-
-    logger.info("Évaluation et fusion des prédictions...")
-    fusion_result = PredictionEvaluator.fuse(predictions)
-    logger.info("Résultat final : %s", fusion_result)
+    # ... (reste du pipeline : modules métiers, fusion, etc.)
 
 if __name__ == '__main__':
     main()
